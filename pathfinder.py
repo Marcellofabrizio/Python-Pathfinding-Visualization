@@ -3,7 +3,7 @@ import random
 import math
 import heapq
 
-size = 50
+size = 70
 
 class Node:
 
@@ -16,11 +16,14 @@ class Node:
         self.neighbours = []
         
         self.wall = False
-        self.visited = False
         self.previous = None #para mantermos um backtrack e construirmos um caminho
 
-        if random.random() < 0.35:
+        if random.random() < 0.40:
             self.wall = True
+
+    def __lt__(self, other): 
+        # para a compareção no heap da fila de prioridade 
+        return self.d < other.d
     
     def set_neighbours(self, grid):
         x = self.x
@@ -55,19 +58,18 @@ def dijkstra(grid):
 
     start.d = 0
 
-    pq.append(start)
+    heapq.heappush(pq, start)
 
     while pq != []:
-        u = pq.pop(0)
+        u = heapq.heappop(pq)
 
         for v in u.neighbours:
             if not v.wall:
                 dist = distance(u, v)
                 if u.d + dist < v.d:
                     v.d = u.d+dist
-                    v.visited = True
                     v.previous = u
-                    pq.append(v)
+                    heapq.heappush(pq, v)
     
     path = []
     current = end
@@ -75,9 +77,10 @@ def dijkstra(grid):
     while (current.x != 0 or current.y != 0):
         path.append(current)
         current = current.previous
+        print(current.x, current.y)
     
     for u in path:
-        u.set = 25
+        u.set = 30
 
 _grid = []
 
@@ -126,7 +129,7 @@ for i in range(size):
         else:
             vis_grid[i][j] = _grid[i][j].set
 
-plt.figure(figsize =(12, 12))
-plt.title('Dijkstra - Shortest Path Finder\n')
+plt.figure(figsize =(20, 20))
 plt.imshow(vis_grid)
-plt.show()
+plt.axis('off')
+plt.savefig("pathfinder.png")
