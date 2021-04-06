@@ -149,13 +149,13 @@ def set_end(x, y):
 
 build_grid()
 
-start = set_start(0,0)
+start = set_start(10,10)
 end = set_end(size-1, size-1)
 
 dijkstra(start, end)
 build_visualization_grid()
 
-plt.figure(figsize =(20, 20))
+plt.figure(figsize =(10, 10))
 plt.axis('off')
 plt.imshow(_plt_grid)
-plt.savefig("pathfinder.png")
+plt.savefig("pathfinder_3.png")
