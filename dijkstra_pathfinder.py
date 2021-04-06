@@ -3,22 +3,34 @@ import random
 import math
 import heapq
 
+INFINITY = float('inf')
+
+VISITED_COLOR = 5
+UNVISITED_COLOR = 10
+WALL_COLOR = 0
+START_COLOR = 20
+END_COLOR = 25
+
 size = 70
+
+_grid = []
+_plt_grid = [] # matrix de visualização
 
 class Node:
 
     def __init__(self, x, y):
-        self.set = 10
+
+        self.grid_color = UNVISITED_COLOR #para cor no gŕafico
         self.x = x
         self.y = y
-        self.d = float('inf') ##distância do nodo inicial
+        self.d = INFINITY #distância do nodo inicial
        
         self.neighbours = []
         
-        self.wall = False
         self.previous = None #para mantermos um backtrack e construirmos um caminho
 
-        if random.random() < 0.40:
+        self.wall = False
+        if random.random() < 0.45:
             self.wall = True
 
     def __lt__(self, other): 
@@ -47,12 +59,9 @@ class Node:
             self.neighbours.append(grid[x-1][y-1])
 
 
-def dijkstra(grid):
-    start = grid[0][0]
-    end = grid[size-1][size-1]
-
-    start.set = 20
-    end.set = 25
+def dijkstra(start, end):
+    start = start
+    end = end
 
     pq = [] #fila de prioridade
 
@@ -62,33 +71,42 @@ def dijkstra(grid):
 
     while pq != []:
         u = heapq.heappop(pq)
-
         for v in u.neighbours:
             if not v.wall:
+                u.grid_color = VISITED_COLOR # marca cor para nodo visitado
                 dist = distance(u, v)
                 if u.d + dist < v.d:
                     v.d = u.d+dist
                     v.previous = u
                     heapq.heappush(pq, v)
     
-    path = []
-    current = end
-    path.append(end)
-    while (current.x != 0 or current.y != 0):
-        path.append(current)
-        current = current.previous
-        print(current.x, current.y)
-    
-    for u in path:
-        u.set = 30
-
-_grid = []
+    build_graph_path(start, end)
 
 def distance(a, b):
     dist = math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
     return dist
 
-def populate_grid(grid):
+def build_graph_path(start, end):
+    path = []
+    current = end
+    path.append(end)
+    if current is None:
+        print("Nenhum caminho possível")
+        return
+    else:
+        while (current.x != start.x or current.y != start.y):
+            path.append(current)
+            current = current.previous
+        
+        for u in path:
+            u.grid_color = 30
+
+def build_grid():
+    populate_grid()
+    add_neighbours_to_nodes()
+
+def populate_grid():
+    # cria as colunas
     for i in range(size):
         row = [Node(0,0) for i in range(size)]
         _grid.append(row)
@@ -97,39 +115,47 @@ def populate_grid(grid):
         for j in range(size):
             _grid[i][j] = Node(i, j)
 
-def add_neighbours():
+def add_neighbours_to_nodes():
     for i in range(size):
         for j in range(size):
             _grid[i][j].set_neighbours(_grid)
 
+def build_visualization_grid():
+    for i in range(size):
+        row = [0 for i in range(size)]
+        _plt_grid.append(row)
 
-populate_grid(_grid)
-add_neighbours()
 
-dijkstra(_grid)
+    for i in range(size):
+        for j in range(size):
+            if _grid[i][j].wall:
+                _plt_grid[i][j] = WALL_COLOR
+            else:
+                _plt_grid[i][j] = _grid[i][j].grid_color
 
-start = _grid[0][0]
-end = _grid[size - 1][size - 1]
+def set_start(x, y):
+    start = _grid[x][y]
+    _grid[x][y].wall = False
+    start.grid_color = START_COLOR
 
-if end == None:
-    end = Node(size-1, size-1)
+    return start
 
-_grid[0][0].wall = False
-_grid[size - 1][size - 1].wall = False
+def set_end(x, y):
+    end = _grid[x][y]
+    _grid[x][y].wall = False
+    end.grid_color = END_COLOR
 
-vis_grid = [] #matriz de visualização
-for i in range(size):
-    row = [0 for i in range(size)]
-    vis_grid.append(row)
+    return end
 
-for i in range(size):
-    for j in range(size):
-        if _grid[i][j].wall:
-            vis_grid[i][j] = _grid[i][j].set - 10
-        else:
-            vis_grid[i][j] = _grid[i][j].set
+build_grid()
+
+start = set_start(0,0)
+end = set_end(size-1, size-1)
+
+dijkstra(start, end)
+build_visualization_grid()
 
 plt.figure(figsize =(20, 20))
-plt.imshow(vis_grid)
 plt.axis('off')
+plt.imshow(_plt_grid)
 plt.savefig("pathfinder.png")
