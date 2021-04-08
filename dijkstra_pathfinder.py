@@ -2,6 +2,9 @@ from matplotlib import pyplot as plt
 import random
 import math
 import heapq
+import logging
+
+from init_logger import init_logger
 
 INFINITY = float('inf')
 
@@ -15,6 +18,10 @@ size = 70
 
 _grid = []
 _plt_grid = [] # matrix de visualização
+
+logging.basicConfig(level= logging.DEBUG)
+
+logger = init_logger(__name__, testing_mode=False)
 
 class Node:
 
@@ -90,16 +97,20 @@ def build_graph_path(start, end):
     path = []
     current = end
     path.append(end)
-    if current is None:
-        print("Nenhum caminho possível")
-        return
-    else:
+    
+    try:
         while (current.x != start.x or current.y != start.y):
             path.append(current)
             current = current.previous
-        
+
         for u in path:
             u.grid_color = 30
+
+        logger.info("Matriz gerada com sucesso")
+
+    except (TypeError, AttributeError):
+            logger.warn("Nenhum caminho possível")
+
 
 def build_grid():
     populate_grid()
@@ -147,15 +158,17 @@ def set_end(x, y):
 
     return end
 
-build_grid()
 
-start = set_start(10,10)
-end = set_end(size-1, size-1)
+if __name__ == "__main__":
+    build_grid()
 
-dijkstra(start, end)
-build_visualization_grid()
+    start = set_start(0,0)
+    end = set_end(size-1, size-1)
 
-plt.figure(figsize =(10, 10))
-plt.axis('off')
-plt.imshow(_plt_grid)
-plt.savefig("pathfinder_3.png")
+    dijkstra(start, end)
+    build_visualization_grid()
+
+    plt.figure(figsize =(10, 10))
+    plt.axis('off')
+    plt.imshow(_plt_grid)
+    plt.savefig("pathfinder_5.png")
