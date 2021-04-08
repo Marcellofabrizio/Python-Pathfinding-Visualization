@@ -27,18 +27,18 @@ class Node:
         self.x = x
         self.y = y
         self.d = INFINITY #distância do nodo inicial
+        self.f = INFINITY
        
         self.neighbours = []
-        
         self.previous = None #para mantermos um backtrack e construirmos um caminho
 
         self.wall = False
-        if random.random() < 0.45:
+        if random.random() < 0.3:
             self.wall = True
 
     def __lt__(self, other): 
         # para a compareção no heap da fila de prioridade 
-        return self.d < other.d
+        return self.f < other.f
     
     def set_neighbours(self, grid):
         x = self.x
@@ -61,35 +61,45 @@ class Node:
         if x > 0 and y > 0:
             self.neighbours.append(grid[x-1][y-1])
 
-
-def dijkstra(start, end):
+def a_star(start, end):
     start = start
     end = end
 
-    pq = [] #fila de prioridade
+    pq = []
 
     start.d = 0
+    start.f = heuristic(start, end)
 
     heapq.heappush(pq, start)
-
-    last_visited_node = start
+    last_visited_node = start #vou usar isso para manter posição do último nodo a ser visitado
     while pq != []:
         u = heapq.heappop(pq)
+
+        if(u == end):
+            break
+
         for v in u.neighbours:
-            if not v.wall:
+            if not v.wall and v not in pq:
                 u.grid_color = VISITED_COLOR # marca cor para nodo visitado
                 dist = distance(u, v)
-                if u.d + dist < v.d:
-                    v.d = u.d+dist
+                alt = u.d + dist 
+                if alt < v.d:
                     v.previous = u
+                    v.d = alt
+                    v.f = distance(v, end) + v.d
                     heapq.heappush(pq, v)
                     last_visited_node = v
+
     
     build_graph_path(last_visited_node, end)
-
+    
 def distance(a, b):
-    dist = math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
-    return dist
+    return math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
+
+def heuristic(a, b):
+    # procurar uma função de heurística melhor
+    # http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html#heuristics-for-grid-maps
+    return math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
 
 def build_graph_path(last_visited_node, end):
 
@@ -163,11 +173,11 @@ if __name__ == "__main__":
     start = set_start(0,0)
     end = set_end(size-1, size-1)
 
-    dijkstra(start, end)
+    a_star(start, end)
     build_visualization_grid()
 
     plt.figure(figsize =(10, 10))
     plt.axis('off')
     plt.imshow(_plt_grid)
-    plt.savefig("images/pathfinder_5.png")
+    plt.savefig("images/a_star_pathfinder_5.png")
     

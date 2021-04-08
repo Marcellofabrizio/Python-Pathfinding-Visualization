@@ -4,7 +4,6 @@ import colorlog
 
 def init_logger(dunder_name, testing_mode) -> logging.Logger:
     log_format = (
-        '%(funcName)s - '
         '%(levelname)s - '
         '%(message)s'
     )
