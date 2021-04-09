@@ -39,7 +39,7 @@ Dijkstra's algorithm uses a data structure for storing and querying partial solu
 
 Dijkstra pathfinding result
 
-[maze](images/pathfinder_2.png)
+![maze](images/pathfinder_2.png)
 
 ### How A* works
 
@@ -92,4 +92,4 @@ function A_Star(start, goal, h)
 
 A* pathfinding result
 
-[maze](images/a_star_pathfinder_5.png)
+![maze](images/a_star_pathfinder_5.png)
